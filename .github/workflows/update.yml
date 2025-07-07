@@ -1,0 +1,34 @@
+
+name: Update VIX Data
+
+on:
+  schedule:
+    - cron: '32 13 * * *'  # Runs daily at 13:32 UTC (~9:32 AM Eastern)
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run fetch script
+        run: python fetch_vix.py
+
+      - name: Commit and push updated vix.json
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add vix.json
+          git commit -m "Update VIX data"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
